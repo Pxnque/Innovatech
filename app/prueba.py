@@ -1,65 +1,96 @@
 import tkinter as tk
-import customtkinter as ctk
+from tkinter import messagebox
+import socket
+import importlib.util
+import os
 
-ctk.set_appearance_mode("System")  # Modes: "System" (standard), "Dark", "Light"
-ctk.set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark-blue"
 
-class App(ctk.CTk):
-    def __init__(self):
+class Login:
+    def __init__(self,window):
         super().__init__()
 
-        # Configure window
-        self.title("CustomTkinter Complex Example")
-        self.geometry("768x540")
+        # Window configuration
+        self.window = window
+        self.window.title("Login")
+        self.window.geometry('1280x720')
+        self.window.configure(bg='#C4C4C4')
 
-        # Configure grid layout (4x4)
-        self.grid_columnconfigure(0, weight=0)
-        self.grid_columnconfigure(1, weight=1)
-        #self.grid_columnconfigure(2, weight=1)
-        self.grid_rowconfigure(6, weight=1)
-        self.grid_rowconfigure((1, 2,3,4,5), weight=0)
+        # Create frame for login elements
+        self.frame = tk.Frame(self, bg='#C4C4C4')
 
-        # Create sidebar frame with widgets
-        self.sidebar_frame = ctk.CTkFrame(self, width=140, corner_radius=0)
-        self.sidebar_frame.grid(row=0, column=0, rowspan=7, sticky="nsew")
+        # Creating widgets
+        self.login_label = tk.Label(
+            self.frame, text="Login", bg='#C4C4C4', fg="#FF3399", font=("Arial", 30))
+        self.username_label = tk.Label(
+            self.frame, text="Username", bg='#C4C4C4', fg="#FFFFFF", font=("Arial", 16))
+        self.username_entry = tk.Entry(self.frame, font=("Arial", 16))
+        self.password_label = tk.Label(
+            self.frame, text="Password", bg='#C4C4C4', fg="#FFFFFF", font=("Arial", 16))
+        self.password_entry = tk.Entry(self.frame, show="*", font=("Arial", 16))
+        self.login_button = tk.Button(
+            self.frame, text="Login", bg="#FF3399", fg="#FFFFFF", font=("Arial", 16), command=self.login)
 
-        # Logo label
-        self.logo_label = ctk.CTkLabel(self.sidebar_frame, text="Nombre empresa", font=ctk.CTkFont(size=20, weight="bold"))
-        self.logo_label.grid(row=0, column=0, padx=40, pady=(20, 10))
+        # Placing widgets on the screen
+        self.login_label.grid(row=0, column=0, columnspan=2, sticky="news", pady=40)
+        self.username_label.grid(row=1, column=0)
+        self.username_entry.grid(row=1, column=1, pady=20)
+        self.password_label.grid(row=2, column=0)
+        self.password_entry.grid(row=2, column=1, pady=20)
+        self.login_button.grid(row=3, column=0, columnspan=2, pady=30)
 
-        # Sidebar button
-        self.sidebar_button = ctk.CTkButton(self.sidebar_frame, text="Registrar empleado", command=self.sidebar_button_event)
-        self.sidebar_button.grid(row=1, column=0, padx=40, pady=10)
+        # Pack frame to display it
+        self.frame.pack()
 
-        # Main content area
-        # Column 1
-        self.label_1 = ctk.CTkLabel(self, text="Ingresar datos del trabajador",font=ctk.CTkFont(size=20,weight="bold"))
-        self.label_1.grid(row=0, column=1, padx=20, pady=(20, 10))
+    def login(self):
+        # Establish socket connection with server
+        client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        client.connect(("localhost", 9999))
 
-        self.entry = ctk.CTkEntry(self, placeholder_text="Nombre",width=350)
-        self.entry.grid(row=1, column=1, padx=20, pady=20, sticky="w")
+        # Receive initial message from server
+        message = client.recv(1024).decode()
 
-        self.string_input_button_2 = ctk.CTkEntry(self, placeholder_text="Apellido Materno",width=350)
-        self.string_input_button_2.grid(row=2, column=1, padx=20, pady=20, sticky="w")
+        # Send username to server
+        client.send(self.username_entry.get().encode())
+        message = client.recv(1024).decode()
 
-        self.string_input_button_3 = ctk.CTkEntry(self, placeholder_text="Apellido Paterno",width=350)
-        self.string_input_button_3.grid(row=3, column=1, padx=20, pady=20, sticky="w")
+        # Send password to server
+        client.send(self.password_entry.get().encode())
 
-        self.string_input_button_4 = ctk.CTkEntry(self, placeholder_text="Linea de trabajo",width=350)
-        self.string_input_button_4.grid(row=4, column=1, padx=20, pady=20, sticky="w")
-        
+        # Receive login result from server
+        msg = client.recv(1024).decode()
 
-        # Column 2
-        self.main_button_1 = ctk.CTkButton(master=self, fg_color="transparent", border_width=2, text_color=("gray10", "#DCE4EE"),text="Agregar trabajador")
-        self.main_button_1.grid(row=5, column=1, padx=(20, 20), pady=70, sticky="w")
+        # Close socket connection
+        client.close()
 
-        
+        # Check login result and show appropriate message box
+        if msg == "1":
+            messagebox.showinfo(title="Login", message=msg)
+            # If login successful, open employee page
+            self.open_employee_page()
+        else:
+            messagebox.showinfo(title="Login failed", message=msg)
 
-        
+    def open_employee_page(self):
+        # Get the path to the empleados.py file in the 'app' folder
+        app_folder = os.path.join(os.path.dirname(__file__), 'app')
+        empleados_path = os.path.join(app_folder, 'empleados.py')
 
-    def sidebar_button_event(self):
-        print("Sidebar Button Clicked")
+        # Dynamically import the empleados module
+        spec = importlib.util.spec_from_file_location("empleados", app_folder)
+        empleados = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(empleados)
+
+        # Create new window for employee page
+        win = tk.Toplevel(self)
+        empleados.App(win)
+        self.withdraw()  # Hide the login window
+        win.deiconify()  # Show the employee page window
+    
+def page():
+    window = tk()
+    Login(window)
+    window.mainloop()
 
 if __name__ == "__main__":
-    app = App()
-    app.mainloop()
+    page()
+    
