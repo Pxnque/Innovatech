@@ -1,6 +1,9 @@
 import tkinter
 from tkinter import messagebox
+from tkinter import *
 import socket
+import empleados
+
 
 
 #window creation
@@ -8,6 +11,12 @@ window = tkinter.Tk()
 window.title("Login")
 window.geometry('1280x720')
 window.configure(bg='#C4C4C4')
+
+def pag_empleados():
+    win = TopLevel()    
+    empleados.App(win)
+    self.window.withdrawn()
+    win.deiconify()
 
 def login():
     client = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
@@ -18,7 +27,12 @@ def login():
     message = client.recv(1024).decode()
     client.send(password_entry.get().encode())
     msg = client.recv(1024).decode()
-    messagebox.showinfo(title="Login",message=msg)
+    if msg == "1":
+        messagebox.showinfo(title="Login",message=msg)
+        
+    else:
+        messagebox.showinfo(title="Login failed",message=msg)
+    
     
 
 frame = tkinter.Frame(bg='#C4C4C4')

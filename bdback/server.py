@@ -21,9 +21,9 @@ def handle_connection(c):
     cur.execute("SELECT * FROM admins WHERE username = ? AND password = ?",(username,password))
 
     if cur.fetchall():
-        c.send("Login succesful".encode())
+        c.send("1".encode())
     else:
-        c.send("Login failed, contact it admin".encode())
+        c.send("Usuario o contraseña incorrectos".encode())
     
 while True:
     client, addr = server.accept()
