@@ -1,4 +1,8 @@
 import tkinter
+from tkinter import messagebox
+import socket
+
+
 #window creation
 window = tkinter.Tk()
 window.title("Login")
@@ -6,7 +10,16 @@ window.geometry('1280x720')
 window.configure(bg='#C4C4C4')
 
 def login():
-    print("Hola mundo")
+    client = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+    client.connect(("localhost",9999))
+
+    message = client.recv(1024).decode()
+    client.send(username_entry.get().encode())
+    message = client.recv(1024).decode()
+    client.send(password_entry.get().encode())
+    msg = client.recv(1024).decode()
+    messagebox.showinfo(title="Login",message=msg)
+    
 
 frame = tkinter.Frame(bg='#C4C4C4')
 
