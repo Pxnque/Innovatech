@@ -37,7 +37,7 @@ def login():
 
 frame = tkinter.Frame(bg='#C4C4C4')
 
-# Creating widgets
+
 login_label = tkinter.Label(
     frame, text="Login", bg='#C4C4C4', fg="#FF3399", font=("Arial", 30))
 username_label = tkinter.Label(
@@ -49,7 +49,7 @@ password_label = tkinter.Label(
 login_button = tkinter.Button(
     frame, text="Login", bg="#FF3399", fg="#FFFFFF", font=("Arial", 16), command=login)
 
-# Placing widgets on the screen
+
 login_label.grid(row=0, column=0, columnspan=2, sticky="news", pady=40)
 username_label.grid(row=1, column=0)
 username_entry.grid(row=1, column=1, pady=20)
