@@ -1,6 +1,7 @@
 import tkinter as tk
 import customtkinter as ctk
 import socket
+import sqlite3
 
 ctk.set_appearance_mode("System")  # Modes: "System" (standard), "Dark", "Light"
 ctk.set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark-blue"
@@ -59,24 +60,21 @@ class App(ctk.CTk):
         
 
     def sidebar_button_event(self):
-          # Recolectar datos
+        # Conectarse a la base de datos y registrar los datos
+        
         nombre = self.entry.get()
         apellido_materno = self.string_input_button_2.get()
         apellido_paterno = self.string_input_button_3.get()
         linea = self.string_input_button_4.get()
-        data = f"{nombre},{apellido_materno},{apellido_paterno},{linea}"
-
-        # Enviar datos al servidor
-        try:
-            client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            client_socket.connect(('localhost', 9999))
-            client_socket.send(data.encode())
-            response = client_socket.recv(1024).decode()
-            print(response)
-        except Exception as e:
-            print(f"Error al conectar al servidor: {str(e)}")
-        finally:
-            client_socket.close()
+        conn = sqlite3.connect('empleados.db')
+        cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO trabajador (nombre, apellidoM, apellidoP, linea)
+            VALUES (?, ?, ?, ?)
+        """, (nombre, apellido_materno, apellido_paterno, linea))
+        conn.commit()
+        conn.close()
+        
 
 if __name__ == "__main__":
     app = App()

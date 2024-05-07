@@ -4,8 +4,9 @@ import socket
 import threading
 
 server = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+#si queremos que multiples equipos se conecten al servidor dejamos en blando el localhost
 server.bind(("localhost",9999))
-
+#Podemos poner un limite a las conexiones si pones un numero adentro del listen
 server.listen()
 
 def handle_connection(c):
