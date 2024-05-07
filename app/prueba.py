@@ -1,96 +1,157 @@
 import tkinter as tk
-from tkinter import messagebox
-import socket
-import importlib.util
-import os
+from tkinter import *
+from tkinter import messagebox,ttk
+import customtkinter as ctk
+import sqlite3
 
+ctk.set_appearance_mode("System")  # Modes: "System" (standard), "Dark", "Light"
+ctk.set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark-blue"
 
-class Login:
-    def __init__(self,window):
+class App(ctk.CTk):
+    def __init__(self):
         super().__init__()
 
-        # Window configuration
-        self.window = window
-        self.window.title("Login")
-        self.window.geometry('1280x720')
-        self.window.configure(bg='#C4C4C4')
+        self.title("e-StockTag Admin Panel")
+        self.geometry("838x470")
 
-        # Create frame for login elements
-        self.frame = tk.Frame(self, bg='#C4C4C4')
+        self.grid_columnconfigure(0, weight=0)
+        self.grid_columnconfigure(1, weight=1)
+        self.grid_rowconfigure(6, weight=1)
+        self.grid_rowconfigure((1, 2,3,4,5), weight=0)
+       
 
-        # Creating widgets
-        self.login_label = tk.Label(
-            self.frame, text="Login", bg='#C4C4C4', fg="#FF3399", font=("Arial", 30))
-        self.username_label = tk.Label(
-            self.frame, text="Username", bg='#C4C4C4', fg="#FFFFFF", font=("Arial", 16))
-        self.username_entry = tk.Entry(self.frame, font=("Arial", 16))
-        self.password_label = tk.Label(
-            self.frame, text="Password", bg='#C4C4C4', fg="#FFFFFF", font=("Arial", 16))
-        self.password_entry = tk.Entry(self.frame, show="*", font=("Arial", 16))
-        self.login_button = tk.Button(
-            self.frame, text="Login", bg="#FF3399", fg="#FFFFFF", font=("Arial", 16), command=self.login)
+        # Create sidebar frame with widgets. FRAME LEFT BOX
+        self.sidebar_frame = ctk.CTkFrame(self, width=140, corner_radius=0)
+        self.sidebar_frame.grid(row=0, column=0, rowspan=7, sticky="nsew")
 
-        # Placing widgets on the screen
-        self.login_label.grid(row=0, column=0, columnspan=2, sticky="news", pady=40)
-        self.username_label.grid(row=1, column=0)
-        self.username_entry.grid(row=1, column=1, pady=20)
-        self.password_label.grid(row=2, column=0)
-        self.password_entry.grid(row=2, column=1, pady=20)
-        self.login_button.grid(row=3, column=0, columnspan=2, pady=30)
+        self.logo_label = ctk.CTkLabel(self.sidebar_frame, text="e-StockTag", font=ctk.CTkFont(size=20, weight="bold"))
+        self.logo_label.grid(row=0, column=0, padx=40, pady=(20, 10))
 
-        # Pack frame to display it
-        self.frame.pack()
+        # Button to display the 'Agregar Trabajador' frame
+        self.sidebar_button = ctk.CTkButton(self.sidebar_frame, text="Registrar empleado", command=self.mostrar_agregar_trabajador)
+        self.sidebar_button.grid(row=1, column=0, padx=40, pady=10)
 
-    def login(self):
-        # Establish socket connection with server
-        client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        client.connect(("localhost", 9999))
+        # Button to display the 'Ver Trabajadores' frame
+        self.sidebar_button1 = ctk.CTkButton(self.sidebar_frame, text="Ver empleados", command=self.mostrar_ver_trabajadores)
+        self.sidebar_button1.grid(row=2, column=0, padx=40, pady=10)
 
-        # Receive initial message from server
-        message = client.recv(1024).decode()
+        
 
-        # Send username to server
-        client.send(self.username_entry.get().encode())
-        message = client.recv(1024).decode()
+        # Main content area. FRAME RIGHT BOX.
+        self.main_frame = ctk.CTkFrame(self)
+        self.main_frame.grid(row=0, column=1, rowspan=7, sticky="nsew")
 
-        # Send password to server
-        client.send(self.password_entry.get().encode())
+        # Frame for 'Agregar Trabajador'
+        self.agregar_trabajador_frame = ctk.CTkFrame(self.main_frame)
+        self.agregar_trabajador_frame.grid(row=0, column=0, sticky="nsew")
+        self.agregar_trabajador_frame.grid_remove()  # Hide initially
 
-        # Receive login result from server
-        msg = client.recv(1024).decode()
+        self.label_1 = ctk.CTkLabel(self.agregar_trabajador_frame, text="Ingresar datos del trabajador",font=ctk.CTkFont(size=20,weight="bold"))
+        self.label_1.grid(row=0, column=0, padx=20, pady=(20, 10))
 
-        # Close socket connection
-        client.close()
+        self.entry = ctk.CTkEntry(self.agregar_trabajador_frame, placeholder_text="Nombre",width=350)
+        self.entry.grid(row=1, column=0, padx=20, pady=20, sticky="w")
 
-        # Check login result and show appropriate message box
-        if msg == "1":
-            messagebox.showinfo(title="Login", message=msg)
-            # If login successful, open employee page
-            self.open_employee_page()
-        else:
-            messagebox.showinfo(title="Login failed", message=msg)
+        self.string_input_button_2 = ctk.CTkEntry(self.agregar_trabajador_frame, placeholder_text="Apellido Materno",width=350)
+        self.string_input_button_2.grid(row=2, column=0, padx=20, pady=20, sticky="w")
 
-    def open_employee_page(self):
-        # Get the path to the empleados.py file in the 'app' folder
-        app_folder = os.path.join(os.path.dirname(__file__), 'app')
-        empleados_path = os.path.join(app_folder, 'empleados.py')
+        self.string_input_button_3 = ctk.CTkEntry(self.agregar_trabajador_frame, placeholder_text="Apellido Paterno",width=350)
+        self.string_input_button_3.grid(row=3, column=0, padx=20, pady=20, sticky="w")
 
-        # Dynamically import the empleados module
-        spec = importlib.util.spec_from_file_location("empleados", app_folder)
-        empleados = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(empleados)
+        self.string_input_button_4 = ctk.CTkEntry(self.agregar_trabajador_frame, placeholder_text="Linea de trabajo",width=350)
+        self.string_input_button_4.grid(row=4, column=0, padx=20, pady=20, sticky="w")
+        
+        self.main_button_1 = ctk.CTkButton(master=self.agregar_trabajador_frame, fg_color="transparent", border_width=2, text_color=("gray10", "#DCE4EE"),text="Agregar trabajador",command=self.sidebar_button_event)
+        self.main_button_1.grid(row=5, column=0, padx=(20, 20), pady=70, sticky="w")
 
-        # Create new window for employee page
-        win = tk.Toplevel(self)
-        empleados.App(win)
-        self.withdraw()  # Hide the login window
-        win.deiconify()  # Show the employee page window
+        # Frame for 'Ver Trabajadores'
+        self.ver_trabajadores_frame = ctk.CTkFrame(self.main_frame)
+        self.ver_trabajadores_frame.grid(row=0, column=0, sticky="nsew")
+        self.ver_trabajadores_frame.grid_remove()  # Hide initially
+
+        self.tabla = ttk.Treeview(self.ver_trabajadores_frame, height=21)
+        self.tabla.grid(column=0, row=0)
+
+        ladox = Scrollbar(self.ver_trabajadores_frame, orient = HORIZONTAL, command= self.tabla.xview)
+        ladox.grid(column=0, row = 1, sticky='ew') 
+        ladoy = Scrollbar(self.ver_trabajadores_frame, orient =VERTICAL, command = self.tabla.yview)
+        ladoy.grid(column = 1, row = 0, sticky='ns')
+
+        self.tabla.configure(xscrollcommand = ladox.set, yscrollcommand = ladoy.set)
+       
+        self.tabla['columns'] = ('Nombre', 'Apellido Materno', 'Apellido Paterno', 'Linea')
+
+        self.tabla.column('#0', minwidth=100, width=120, anchor='center')
+        self.tabla.column('Nombre', minwidth=100, width=130 , anchor='center')
+        self.tabla.column('Apellido Materno', minwidth=100, width=120, anchor='center' )
+        self.tabla.column('Apellido Paterno', minwidth=100, width=120 , anchor='center')
+        self.tabla.column('Linea', minwidth=100, width=105, anchor='center')
+
+        self.tabla.heading('#0', text='Id', anchor ='center')
+        self.tabla.heading('Nombre', text='Nombre', anchor ='center')
+        self.tabla.heading('Apellido Materno', text='Apellido Materno', anchor ='center')
+        self.tabla.heading('Apellido Paterno', text='Apellido Paterno', anchor ='center')
+        self.tabla.heading('Linea', text='Linea', anchor ='center')
+
+        estilo = ttk.Style(self.ver_trabajadores_frame)
+        estilo.theme_use('alt') 
+        estilo.configure(".",font= ('Helvetica', 12, 'bold'), foreground='red2')        
+        estilo.configure("Treeview", font= ('Helvetica', 10, 'bold'), foreground='black',  background='white')
+        estilo.map('Treeview',background=[('selected', 'green2')], foreground=[('selected','black')] )
+
+        self.tabla.bind("<<TreeviewSelect>>", self.obtener_fila)  # seleccionar  fila
+        
+    def mostrar_agregar_trabajador(self):
+        self.ver_trabajadores_frame.grid_remove()
+        self.agregar_trabajador_frame.grid()
+
+    def mostrar_ver_trabajadores(self):
+        self.agregar_trabajador_frame.grid_remove()
+        self.ver_trabajadores_frame.grid()
+        try:
+            conn = sqlite3.connect('database.db')
+            cursor = conn.cursor()
+            sql = "SELECT * FROM trabajador " 
+            cursor.execute(sql)
+            registro = cursor.fetchall()
+            i = -1
+            for i in range(len(registro)):  # Iterar sobre un rango de 0 a la longitud de los registros - 1
+                self.tabla.insert('', i, text=registro[i][0], values=registro[i][1:])
+        except Exception as e:
+            messagebox.showerror("Error",e)
+
     
-def page():
-    window = tk()
-    Login(window)
-    window.mainloop()
+    def obtener_fila(self, event):
+        current_item = self.tabla.focus()
+        if not current_item:
+            return
+        data = self.tabla.item(current_item)
+        self.nombre_borar = data['values'][0]
+ 
+    def sidebar_button_event(self):
+        # Conectarse a la base de datos y registrar los datos
+        
+        nombre = self.entry.get()
+        apellido_materno = self.string_input_button_2.get()
+        apellido_paterno = self.string_input_button_3.get()
+        linea = self.string_input_button_4.get()
+        try:
+            conn = sqlite3.connect('database.db')
+            cursor = conn.cursor()
+            cursor.execute("""
+                INSERT INTO trabajador (nombre, apellidoM, apellidoP, linea)
+                VALUES (?, ?, ?, ?)
+            """, (nombre, apellido_materno, apellido_paterno, linea))
+            conn.commit()
+            conn.close()
+            messagebox.showinfo("Exito","Se ingreso al nuevo trabajador exitosamente")
+            self.entry.set('')
+            self.string_input_button_2.set('')
+            self.string_input_button_3.set('')
+            self.string_input_button_4.set('')
+        except Exception as e:
+            messagebox.showerror("Error",e)
 
 if __name__ == "__main__":
-    page()
-    
+    app = App()
+    app.mainloop()
