@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import messagebox
 import customtkinter as ctk
 import socket
 import sqlite3
@@ -30,7 +31,7 @@ class App(ctk.CTk):
         self.logo_label.grid(row=0, column=0, padx=40, pady=(20, 10))
 
         # Sidebar button
-        self.sidebar_button = ctk.CTkButton(self.sidebar_frame, text="Registrar empleado", command=self.sidebar_button_event)
+        self.sidebar_button = ctk.CTkButton(self.sidebar_frame, text="Registrar empleado")
         self.sidebar_button.grid(row=1, column=0, padx=40, pady=10)
 
         # Main content area
@@ -52,11 +53,11 @@ class App(ctk.CTk):
         
 
         # Column 2
-        self.main_button_1 = ctk.CTkButton(master=self, fg_color="transparent", border_width=2, text_color=("gray10", "#DCE4EE"),text="Agregar trabajador")
+        self.main_button_1 = ctk.CTkButton(master=self, fg_color="transparent", border_width=2, text_color=("gray10", "#DCE4EE"),text="Agregar trabajador",command=self.sidebar_button_event)
         self.main_button_1.grid(row=5, column=1, padx=(20, 20), pady=70, sticky="w")
 
         
-
+        
         
 
     def sidebar_button_event(self):
@@ -66,14 +67,18 @@ class App(ctk.CTk):
         apellido_materno = self.string_input_button_2.get()
         apellido_paterno = self.string_input_button_3.get()
         linea = self.string_input_button_4.get()
-        conn = sqlite3.connect('empleados.db')
-        cursor = conn.cursor()
-        cursor.execute("""
-            INSERT INTO trabajador (nombre, apellidoM, apellidoP, linea)
-            VALUES (?, ?, ?, ?)
-        """, (nombre, apellido_materno, apellido_paterno, linea))
-        conn.commit()
-        conn.close()
+        try:
+            conn = sqlite3.connect('database.db')
+            cursor = conn.cursor()
+            cursor.execute("""
+                INSERT INTO trabajador (nombre, apellidoM, apellidoP, linea)
+                VALUES (?, ?, ?, ?)
+            """, (nombre, apellido_materno, apellido_paterno, linea))
+            conn.commit()
+            conn.close()
+            messagebox.showinfo("Exito","Se ingreso al nuevo trabajador exitosamente")
+        except Exception as e:
+            messagebox.showerror("Error",e)
         
 
 if __name__ == "__main__":
