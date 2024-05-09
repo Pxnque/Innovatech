@@ -4,8 +4,9 @@ import socket
 import threading
 
 server = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+#si queremos que multiples equipos se conecten al servidor dejamos en blando el localhost
 server.bind(("localhost",9999))
-
+#Podemos poner un limite a las conexiones si pones un numero adentro del listen
 server.listen()
 
 def handle_connection(c):
@@ -21,9 +22,9 @@ def handle_connection(c):
     cur.execute("SELECT * FROM admins WHERE username = ? AND password = ?",(username,password))
 
     if cur.fetchall():
-        c.send("Login succesful".encode())
+        c.send("1".encode())
     else:
-        c.send("Login failed, contact it admin".encode())
+        c.send("Usuario o contraseña incorrectos".encode())
     
 while True:
     client, addr = server.accept()
