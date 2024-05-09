@@ -13,7 +13,7 @@ class App(ctk.CTk):
         super().__init__()
         self.title("e-StockTag Admin Panel")
         self.geometry("838x470")
-
+        self.is_Selected = False
         self.grid_columnconfigure(0, weight=0)
         self.grid_columnconfigure(1, weight=1)
         self.grid_rowconfigure(6, weight=1)
@@ -22,6 +22,7 @@ class App(ctk.CTk):
 
         # Create sidebar frame with widgets. FRAME LEFT BOX
         self.sidebar_frame = ctk.CTkFrame(self, width=140, corner_radius=0)
+        self.sidebar_frame.configure(fg_color='#B4B4B8')
         self.sidebar_frame.grid(row=0, column=0, rowspan=7, sticky="nsew")
 
         self.logo_label = ctk.CTkLabel(self.sidebar_frame, text="e-StockTag", font=ctk.CTkFont(size=20, weight="bold"))
@@ -40,15 +41,16 @@ class App(ctk.CTk):
         self.sidebar_button2.configure(fg_color='#4F6F52')
         self.sidebar_button2.grid(row=3, column=0, padx=40, pady=10)
 
-        # Button to generate the qr from the trabajador
+        # Button to alter trabajador attributes
         self.sidebar_button3 = ctk.CTkButton(self.sidebar_frame, text="Editar trabajador", command=self.generar_qr)
-        self.sidebar_button3.configure(fg_color='#4F6F52')
-        self.sidebar_button3.grid(row=3, column=0, padx=40, pady=10)
+        self.sidebar_button3.configure(fg_color='#FFDB5C')
+        self.sidebar_button3.configure(text_color='#151515')
+        self.sidebar_button3.grid(row=4, column=0, padx=40, pady=10)
         
-        # Button to generate the qr from the trabajador
-        self.sidebar_button4 = ctk.CTkButton(self.sidebar_frame, text="Generar QR", command=self.generar_qr)
-        self.sidebar_button4.configure(fg_color='#4F6F52')
-        self.sidebar_button4.grid(row=3, column=0, padx=40, pady=10)
+        # Button to delete trabajador
+        self.sidebar_button4 = ctk.CTkButton(self.sidebar_frame, text="Dar de baja", command=self.generar_qr)
+        self.sidebar_button4.configure(fg_color='#803D3B')
+        self.sidebar_button4.grid(row=5, column=0, padx=40, pady=10)
 
         # Main content area. FRAME RIGHT BOX.
         self.main_frame = ctk.CTkFrame(self)
@@ -56,7 +58,8 @@ class App(ctk.CTk):
 
         # Frame for 'Agregar Trabajador'
         self.agregar_trabajador_frame = ctk.CTkFrame(self.main_frame)
-        self.agregar_trabajador_frame.grid(row=0, column=0, sticky="nsew")
+        self.agregar_trabajador_frame.grid(row=0, column=0)
+        self.agregar_trabajador_frame.configure(fg_color='#DBDBDB')
         self.agregar_trabajador_frame.grid_remove()  # Hide initially
 
         self.label_1 = ctk.CTkLabel(self.agregar_trabajador_frame, text="Ingresar datos del trabajador",font=ctk.CTkFont(size=20,weight="bold"))
@@ -114,17 +117,36 @@ class App(ctk.CTk):
 
         self.tabla.bind("<<TreeviewSelect>>", self.obtener_fila)  # seleccionar  fila
     
+    def alter_trabajador(self):
+        if (self.is_Selected):
+           pass
+        else:
+            messagebox.showwarning("Alerta","Debe de seleccionar primero un trabajador para poder modificar al trabajador")
+            return
+
+    def drop_trabajador(self):
+        if (self.is_Selected):
+           pass
+        else:
+            messagebox.showwarning("Alerta","Debe de seleccionar primero un trabajador para poder eliminar al trabajador")
+            return
+
     def generar_qr(self):
-        #codificando el qr con la informacion del trabajador
-        img = qrcode.make(self.info_seleccionado)
- 
-        # Guardando el qr
-        path = 'C:\\Users\\panqu\\OneDrive\\Escritorio\\Innovatech\\Innovatech\\app\\QRs'
-        try:
-            img.save(path+'\\qr_'+ self.nombre_seleccionado + self.AM_seleccionado + self.AP_seleccionado+".png")
-            messagebox.showinfo("Exito","El qr del trabajador se generó con exito.")
-        except Exception as e:
-            messagebox.showerror(e)
+        if (self.is_Selected):
+            #codificando el qr con la informacion del trabajador
+            img = qrcode.make(self.info_seleccionado)
+    
+            # Guardando el qr
+            path = 'C:\\Users\\panqu\\OneDrive\\Escritorio\\Innovatech\\Innovatech\\app\\QRs'
+            try:
+                img.save(path+'\\qr_'+ self.nombre_seleccionado + self.AM_seleccionado + self.AP_seleccionado+".png")
+                messagebox.showinfo("Exito","El qr del trabajador se generó con exito.")
+            except Exception as e:
+                messagebox.showerror(e)
+        else:
+            messagebox.showwarning("Alerta","Debe de seleccionar primero un trabajador para poder generar su codigo qr")
+            return
+        
         
         
     def mostrar_agregar_trabajador(self):
@@ -134,6 +156,7 @@ class App(ctk.CTk):
     def mostrar_ver_trabajadores(self):
         self.agregar_trabajador_frame.grid_remove()
         self.ver_trabajadores_frame.grid()
+        self.tabla.delete(*self.tabla.get_children())
         try:
             conn = sqlite3.connect('database.db')
             cursor = conn.cursor()
@@ -150,12 +173,14 @@ class App(ctk.CTk):
     def obtener_fila(self, event):
         current_item = self.tabla.focus()
         if not current_item:
+            self.is_Selected = False
             return
         data = self.tabla.item(current_item)
         self.info_seleccionado = ','.join(str(x) for x in data['values'])
         self.nombre_seleccionado = data['values'][0]
         self.AM_seleccionado = data['values'][1]
         self.AP_seleccionado = data['values'][2]
+        self.is_Selected = True
 
  
     def sidebar_button_event(self):
