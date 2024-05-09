@@ -141,13 +141,45 @@ class App(ctk.CTk):
         self.tabla.bind("<<TreeviewSelect>>", self.obtener_fila)  # seleccionar  fila
     
     def boton_editar(self):
-        pass
+        nombre = self.entry_editar.get()
+        apellido_materno = self.string_input_button_e2.get()
+        apellido_paterno = self.string_input_button_e3.get()
+        linea = self.string_input_button_e4.get()
+        id_trabajador = self.id_seleccionado
+        try:
+            conn = sqlite3.connect('database.db')
+            cursor = conn.cursor()
+            cursor.execute("""
+                UPDATE trabajador
+                SET nombre = ?, apellidoM = ?, apellidoP = ?, linea = ?
+                WHERE id = ?
+            """, (nombre, apellido_materno, apellido_paterno, linea, id_trabajador))
+
+            conn.commit()
+            conn.close()
+            messagebox.showinfo("Exito","Se editaron los datos del trabajador")
+            self.mostrar_ver_trabajadores
+        except Exception as e:
+            messagebox.showerror("Error",e)
 
     
 
     def drop_trabajador(self):
         if (self.is_Selected):
-           pass
+            id_trabajador = self.id_seleccionado
+            try:
+                conn = sqlite3.connect('database.db')
+                cursor = conn.cursor()
+                cursor.execute("""
+                DELETE FROM trabajador
+                WHERE id = ?
+                """, (id_trabajador,))
+                conn.commit()
+                conn.close()
+                messagebox.showinfo("Exito","Se elimino al empleado exitosamente")
+                self.mostrar_ver_trabajadores
+            except Exception as e:  
+                messagebox.showerror(e)     
         else:
             messagebox.showwarning("Alerta","Debe de seleccionar primero un trabajador para poder eliminar al trabajador")
             return
@@ -173,6 +205,11 @@ class App(ctk.CTk):
             self.ver_trabajadores_frame.grid_remove()
             self.agregar_trabajador_frame.grid_remove()
             self.editar_trabajador_frame.grid()
+            self.entry_editar.insert(END,self.nombre_seleccionado)
+            self.string_input_button_e2.insert(END,self.AM_seleccionado)
+            self.string_input_button_e3.insert(END,self.AP_seleccionado)
+            self.string_input_button_e4.insert(END,self.linea_seleccionado)
+           
         else:
             messagebox.showwarning("Alerta","Debe de seleccionar primero un trabajador para poder modificar al trabajador")
             return    
@@ -206,10 +243,13 @@ class App(ctk.CTk):
             self.is_Selected = False
             return
         data = self.tabla.item(current_item)
+        
         self.info_seleccionado = ','.join(str(x) for x in data['values'])
         self.nombre_seleccionado = data['values'][0]
         self.AM_seleccionado = data['values'][1]
         self.AP_seleccionado = data['values'][2]
+        self.linea_seleccionado = data['values'][3]
+        self.id_seleccionado = data['text']
         self.is_Selected = True
 
  
