@@ -42,7 +42,7 @@ class App(ctk.CTk):
         self.sidebar_button2.grid(row=3, column=0, padx=40, pady=10)
 
         # Button to alter trabajador attributes
-        self.sidebar_button3 = ctk.CTkButton(self.sidebar_frame, text="Editar trabajador", command=self.generar_qr)
+        self.sidebar_button3 = ctk.CTkButton(self.sidebar_frame, text="Editar trabajador", command=self.mostrar_editar_trabajador)
         self.sidebar_button3.configure(fg_color='#FFDB5C')
         self.sidebar_button3.configure(text_color='#151515')
         self.sidebar_button3.grid(row=4, column=0, padx=40, pady=10)
@@ -80,6 +80,29 @@ class App(ctk.CTk):
         self.main_button_1 = ctk.CTkButton(master=self.agregar_trabajador_frame, fg_color="transparent", border_width=2, text_color=("gray10", "#DCE4EE"),text="Agregar trabajador",command=self.sidebar_button_event)
         self.main_button_1.grid(row=5, column=0, padx=(20, 20), pady=70, sticky="w")
 
+        #Frame for 'Editar Trabajadores
+        self.editar_trabajador_frame = ctk.CTkFrame(self.main_frame)
+        self.editar_trabajador_frame.grid(row=0, column=0)
+        self.editar_trabajador_frame.configure(fg_color='#DBDBDB')
+        self.editar_trabajador_frame.grid_remove()  # Hide initially
+
+        self.label_editar1 = ctk.CTkLabel(self.editar_trabajador_frame, text="Datos del trabajador",font=ctk.CTkFont(size=20,weight="bold"))
+        self.label_editar1.grid(row=0, column=0, padx=20, pady=(20, 10))
+
+        self.entry_editar = ctk.CTkEntry(self.editar_trabajador_frame, placeholder_text="Nombre",width=350)
+        self.entry_editar.grid(row=1, column=0, padx=20, pady=20, sticky="w")
+
+        self.string_input_button_e2 = ctk.CTkEntry(self.editar_trabajador_frame, placeholder_text="Apellido Materno",width=350)
+        self.string_input_button_e2.grid(row=2, column=0, padx=20, pady=20, sticky="w")
+
+        self.string_input_button_e3 = ctk.CTkEntry(self.editar_trabajador_frame, placeholder_text="Apellido Paterno",width=350)
+        self.string_input_button_e3.grid(row=3, column=0, padx=20, pady=20, sticky="w")
+
+        self.string_input_button_e4 = ctk.CTkEntry(self.editar_trabajador_frame, placeholder_text="Linea de trabajo",width=350)
+        self.string_input_button_e4.grid(row=4, column=0, padx=20, pady=20, sticky="w")
+        
+        self.main_button_e1 = ctk.CTkButton(master=self.editar_trabajador_frame, fg_color="transparent", border_width=2, text_color=("gray10", "#DCE4EE"),text="Editar trabajador",command=self.boton_editar)
+        self.main_button_e1.grid(row=5, column=0, padx=(20, 20), pady=70, sticky="w")
         # Frame for 'Ver Trabajadores'
         self.ver_trabajadores_frame = ctk.CTkFrame(self.main_frame)
         self.ver_trabajadores_frame.grid(row=0, column=0, sticky="nsew")
@@ -117,12 +140,10 @@ class App(ctk.CTk):
 
         self.tabla.bind("<<TreeviewSelect>>", self.obtener_fila)  # seleccionar  fila
     
-    def alter_trabajador(self):
-        if (self.is_Selected):
-           pass
-        else:
-            messagebox.showwarning("Alerta","Debe de seleccionar primero un trabajador para poder modificar al trabajador")
-            return
+    def boton_editar(self):
+        pass
+
+    
 
     def drop_trabajador(self):
         if (self.is_Selected):
@@ -147,14 +168,23 @@ class App(ctk.CTk):
             messagebox.showwarning("Alerta","Debe de seleccionar primero un trabajador para poder generar su codigo qr")
             return
         
-        
+    def mostrar_editar_trabajador(self):
+        if (self.is_Selected):
+            self.ver_trabajadores_frame.grid_remove()
+            self.agregar_trabajador_frame.grid_remove()
+            self.editar_trabajador_frame.grid()
+        else:
+            messagebox.showwarning("Alerta","Debe de seleccionar primero un trabajador para poder modificar al trabajador")
+            return    
         
     def mostrar_agregar_trabajador(self):
         self.ver_trabajadores_frame.grid_remove()
+        self.editar_trabajador_frame.grid_remove()
         self.agregar_trabajador_frame.grid()
 
     def mostrar_ver_trabajadores(self):
         self.agregar_trabajador_frame.grid_remove()
+        self.editar_trabajador_frame.grid_remove()
         self.ver_trabajadores_frame.grid()
         self.tabla.delete(*self.tabla.get_children())
         try:
