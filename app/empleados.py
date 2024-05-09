@@ -48,7 +48,7 @@ class App(ctk.CTk):
         self.sidebar_button3.grid(row=4, column=0, padx=40, pady=10)
         
         # Button to delete trabajador
-        self.sidebar_button4 = ctk.CTkButton(self.sidebar_frame, text="Dar de baja", command=self.generar_qr)
+        self.sidebar_button4 = ctk.CTkButton(self.sidebar_frame, text="Dar de baja", command=self.drop_trabajador)
         self.sidebar_button4.configure(fg_color='#803D3B')
         self.sidebar_button4.grid(row=5, column=0, padx=40, pady=10)
 
@@ -177,7 +177,7 @@ class App(ctk.CTk):
                 conn.commit()
                 conn.close()
                 messagebox.showinfo("Exito","Se elimino al empleado exitosamente")
-                self.mostrar_ver_trabajadores
+                self.mostrar_ver_trabajadores()
             except Exception as e:  
                 messagebox.showerror(e)     
         else:
