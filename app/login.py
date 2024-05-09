@@ -9,8 +9,8 @@ from empleados import App
 #window creation
 window = tkinter.Tk()
 window.title("Login")
-window.geometry('1280x720')
-window.configure(bg='#C4C4C4')
+window.geometry('838x470')
+window.configure(bg='#DBDBDB')
 
 def launch_empleados_app():
     app = App()  # Create an instance of the App class from empleados.py
@@ -34,27 +34,27 @@ def login():
     
     
 
-frame = tkinter.Frame(bg='#C4C4C4')
+frame = tkinter.Frame(bg='#DBDBDB')
 
 
 login_label = tkinter.Label(
-    frame, text="Login", bg='#C4C4C4', fg="#FF3399", font=("Arial", 30))
+    frame, text="Iniciar sesión", bg='#DBDBDB', fg="#056571", font=("System", 30))
 username_label = tkinter.Label(
-    frame, text="Username", bg='#C4C4C4', fg="#FFFFFF", font=("Arial", 16))
+    frame, text="Usuario", bg='#DBDBDB', fg="#000000", font=("Arial", 16))
 username_entry = tkinter.Entry(frame, font=("Arial", 16))
 password_entry = tkinter.Entry(frame, show="*", font=("Arial", 16))
 password_label = tkinter.Label(
-    frame, text="Password", bg='#C4C4C4', fg="#FFFFFF", font=("Arial", 16))
+    frame, text="Contraseña", bg='#DBDBDB', fg="#000000", font=("Arial", 16))
 login_button = tkinter.Button(
-    frame, text="Login", bg="#FF3399", fg="#FFFFFF", font=("Arial", 16), command=login)
+    frame, text="Login", bg="#056571", fg="#FFFFFF", font=("Arial", 16), command=login)
 
 
 login_label.grid(row=0, column=0, columnspan=2, sticky="news", pady=40)
-username_label.grid(row=1, column=0)
-username_entry.grid(row=1, column=1, pady=20)
-password_label.grid(row=2, column=0)
-password_entry.grid(row=2, column=1, pady=20)
-login_button.grid(row=3, column=0, columnspan=2, pady=30)
+username_label.grid(row=1, column=0, sticky='W')
+username_entry.grid(row=2, column=0, pady=10)
+password_label.grid(row=3, column=0, sticky='W',pady=[20,7])
+password_entry.grid(row=4, column=0)
+login_button.grid(row=5, column=0, columnspan=3, pady=30,sticky='WE')
 
 frame.pack()
 
