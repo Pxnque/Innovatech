@@ -158,7 +158,7 @@ class App(ctk.CTk):
             conn.commit()
             conn.close()
             messagebox.showinfo("Exito","Se editaron los datos del trabajador")
-            self.mostrar_ver_trabajadores
+            self.mostrar_ver_trabajadores()
         except Exception as e:
             messagebox.showerror("Error",e)
 
